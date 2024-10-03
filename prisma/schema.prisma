@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  userLectures UserLecture[]
+}
+
+model Speaker {
+  id       Int       @id @default(autoincrement())
+  name     String
+  lectures Lecture[]
+}
+
+model Lecture {
+  id              Int           @id @default(autoincrement())
+  speakerId       Int
+  title           String
+  description     String
+  date            DateTime
+  capacity        Int           @default(30) // 정원은 기본 30명
+  speaker         Speaker       @relation(fields: [speakerId], references: [id])
+  registeredCount Int           @default(0) // 등록된 수
+  userLectures    UserLecture[]
+}
+
+model UserLecture {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  lectureId Int
+  user      User    @relation(fields: [userId], references: [id])
+  lecture   Lecture @relation(fields: [lectureId], references: [id])
+
+  @@unique([userId, lectureId])
+  @@index([userId, lectureId])
+}
